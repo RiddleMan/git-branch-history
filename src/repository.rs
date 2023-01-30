@@ -23,6 +23,7 @@ pub struct CheckoutEntry {
     pub exists: bool,
 }
 
+// ?Add current branch to list?
 pub fn get_list(no: usize) -> Result<Vec<CheckoutEntry>, Box<dyn Error>> {
     let repo = get_repo()?;
 
@@ -69,7 +70,7 @@ pub fn checkout_last() -> Result<(), Box<dyn Error>> {
 
     let repo = get_repo()?;
     let revspec = repo.revparse(&last_checkout.branch)?;
-    let rev = revspec.to().unwrap();
+    let rev = revspec.from().unwrap();
 
     repo.checkout_tree(rev, None)?;
 
