@@ -2,6 +2,7 @@ use crate::args::{Arguments, GitBranchHistoryCommand};
 use crate::repository::Repository;
 use std::error::Error;
 use std::io;
+use std::io::Write;
 
 fn display_list(repo: &Repository, count: usize) -> Result<(), Box<dyn Error>> {
     repo.get_list(count)?
@@ -22,7 +23,9 @@ fn display_list(repo: &Repository, count: usize) -> Result<(), Box<dyn Error>> {
 fn checkout_interactive(repo: &Repository, length: usize) -> Result<(), Box<dyn Error>> {
     display_list(repo, length)?;
 
+    println!();
     print!("Which branch to checkout: ");
+    let _ = io::stdout().flush();
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
 
