@@ -1,5 +1,3 @@
-use core::panicking::panic;
-use git2::build::CheckoutBuilder;
 use git2::Repository;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -60,7 +58,8 @@ pub fn get_list(no: usize) -> Result<Vec<CheckoutEntry>, Box<dyn Error>> {
 }
 
 pub fn checkout_last() -> Result<(), Box<dyn Error>> {
-    let last_checkout = get_list(1)?
+    let branch_list = get_list(1)?;
+    let last_checkout = branch_list
         .first()
         .expect("There's no entry of last checkout. Is it a fresh repo?");
 
@@ -69,7 +68,8 @@ pub fn checkout_last() -> Result<(), Box<dyn Error>> {
     }
 
     let repo = get_repo()?;
-    let rev = repo.revparse(&last_checkout.branch)?.to().unwrap();
+    let revspec = repo.revparse(&last_checkout.branch)?;
+    let rev = revspec.to().unwrap();
 
     repo.checkout_tree(rev, None)?;
 
