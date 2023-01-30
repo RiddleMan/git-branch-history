@@ -66,7 +66,7 @@ impl Repository {
     }
 
     pub fn checkout_nth(&self, n: usize) -> Result<(), Box<dyn Error>> {
-        let branch_list = self.get_list(n)?;
+        let branch_list = self.get_list(n + 1)?;
         let branch = branch_list.get(n).expect("Entry doesn't exist.");
 
         self.checkout_branch(&branch.branch)
