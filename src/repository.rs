@@ -1,10 +1,11 @@
-use git2::Repository;
+use git2::Repository as GRepository;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::error::Error;
 
-fn get_repo() -> Result<Repository, Box<dyn Error>> {
-    Ok(Repository::discover(std::env::current_dir()?)?)
+pub struct CheckoutEntry {
+    pub branch: String,
+    pub exists: bool,
 }
 
 fn get_from_branch_from_ref_msg(value: &str) -> String {
@@ -18,61 +19,68 @@ fn get_from_branch_from_ref_msg(value: &str) -> String {
     caps["from_branch"].to_owned()
 }
 
-pub struct CheckoutEntry {
-    pub branch: String,
-    pub exists: bool,
+pub struct Repository {
+    inner: GRepository,
 }
 
-// ?Add current branch to list?
-pub fn get_list(no: usize) -> Result<Vec<CheckoutEntry>, Box<dyn Error>> {
-    let repo = get_repo()?;
-
-    let reflog = repo.reflog("HEAD")?;
-
-    let checkout_logs: Vec<_> = reflog
-        .iter()
-        .filter(|log| {
-            if let Some(msg) = log.message() {
-                msg.starts_with("checkout: ")
-            } else {
-                false
-            }
+impl Repository {
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        Ok(Repository {
+            inner: GRepository::discover(std::env::current_dir()?)?,
         })
-        .map(|log| {
-            let branch_name = if let Some(msg) = log.message() {
-                get_from_branch_from_ref_msg(msg)
-            } else {
-                "".to_owned()
-            };
-
-            let exists = repo.revparse(&branch_name).map_or_else(|_| false, |_| true);
-
-            CheckoutEntry {
-                branch: branch_name,
-                exists,
-            }
-        })
-        .take(no)
-        .collect();
-
-    Ok(checkout_logs)
-}
-
-pub fn checkout_last() -> Result<(), Box<dyn Error>> {
-    let branch_list = get_list(1)?;
-    let last_checkout = branch_list
-        .first()
-        .expect("There's no entry of last checkout. Is it a fresh repo?");
-
-    if !last_checkout.exists {
-        panic!("Branch of name: {} no longer exists. Run: `git branch-history checkout` to select other branch.", last_checkout.branch);
     }
 
-    let repo = get_repo()?;
-    let revspec = repo.revparse_single(&last_checkout.branch)?;
+    pub fn get_list(&self, no: usize) -> Result<Vec<CheckoutEntry>, Box<dyn Error>> {
+        let reflog = self.inner.reflog("HEAD")?;
 
-    repo.checkout_tree(&revspec, None)?;
-    repo.set_head(&format!("refs/heads/{}", &last_checkout.branch))?;
+        let checkout_logs: Vec<_> = reflog
+            .iter()
+            .filter(|log| {
+                if let Some(msg) = log.message() {
+                    msg.starts_with("checkout: ")
+                } else {
+                    false
+                }
+            })
+            .map(|log| {
+                let branch_name = if let Some(msg) = log.message() {
+                    get_from_branch_from_ref_msg(msg)
+                } else {
+                    "".to_owned()
+                };
 
-    Ok(())
+                let exists = self
+                    .inner
+                    .revparse(&branch_name)
+                    .map_or_else(|_| false, |_| true);
+
+                CheckoutEntry {
+                    branch: branch_name,
+                    exists,
+                }
+            })
+            .take(no)
+            .collect();
+
+        Ok(checkout_logs)
+    }
+
+    pub fn checkout_last(&self) -> Result<(), Box<dyn Error>> {
+        let branch_list = self.get_list(1)?;
+        let last_checkout = branch_list
+            .first()
+            .expect("There's no entry of last checkout. Is it a fresh repo?");
+
+        if !last_checkout.exists {
+            panic!("Branch of name: {} no longer exists. Run: `git branch-history checkout` to select other branch.", last_checkout.branch);
+        }
+
+        let revspec = self.inner.revparse_single(&last_checkout.branch)?;
+
+        self.inner.checkout_tree(&revspec, None)?;
+        self.inner
+            .set_head(&format!("refs/heads/{}", &last_checkout.branch))?;
+
+        Ok(())
+    }
 }
