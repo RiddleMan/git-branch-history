@@ -3,6 +3,7 @@ use crate::command::Command;
 
 mod args;
 mod command;
+mod repository;
 
 fn main() {
     let args = Args::parse();
