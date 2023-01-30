@@ -69,9 +69,9 @@ pub fn checkout_last() -> Result<(), Box<dyn Error>> {
     }
 
     let repo = get_repo()?;
-    // let revspec = repo.revparse(&last_checkout.branch)?;
-    // let rev = revspec.from().unwrap();
+    let revspec = repo.revparse_single(&last_checkout.branch)?;
 
+    repo.checkout_tree(&revspec, None)?;
     repo.set_head(&format!("refs/heads/{}", &last_checkout.branch))?;
 
     Ok(())
