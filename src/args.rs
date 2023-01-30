@@ -11,7 +11,10 @@ pub enum GitBranchHistoryCommand {
     /// Navigate to previous branch from history
     PopBranch,
     /// Checkout a branch from history
-    Checkout { no: usize },
+    Checkout {
+        /// No of branch to select from history
+        no: Option<usize>,
+    },
 }
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]

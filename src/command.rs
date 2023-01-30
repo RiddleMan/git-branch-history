@@ -27,7 +27,6 @@ impl Command {
             GitBranchHistoryCommand::Checkout { .. } => {}
         };
         get_list(10)?;
-        println!("{:?}", args);
         Ok(())
     }
 }
