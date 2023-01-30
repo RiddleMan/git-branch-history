@@ -19,8 +19,8 @@ fn get_from_branch_from_ref_msg(value: &str) -> String {
 }
 
 pub struct CheckoutEntry {
-    branch: String,
-    exists: bool,
+    pub branch: String,
+    pub exists: bool,
 }
 
 pub fn get_list(no: usize) -> Result<Vec<CheckoutEntry>, Box<dyn Error>> {
