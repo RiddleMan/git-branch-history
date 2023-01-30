@@ -1,3 +1,5 @@
+use core::panicking::panic;
+use git2::build::CheckoutBuilder;
 use git2::Repository;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -55,4 +57,21 @@ pub fn get_list(no: usize) -> Result<Vec<CheckoutEntry>, Box<dyn Error>> {
         .collect();
 
     Ok(checkout_logs)
+}
+
+pub fn checkout_last() -> Result<(), Box<dyn Error>> {
+    let last_checkout = get_list(1)?
+        .first()
+        .expect("There's no entry of last checkout. Is it a fresh repo?");
+
+    if !last_checkout.exists {
+        panic!("Branch of name: {} no longer exists. Run: `git branch-history checkout` to select other branch.", last_checkout.branch);
+    }
+
+    let repo = get_repo()?;
+    let rev = repo.revparse(&last_checkout.branch)?.to().unwrap();
+
+    repo.checkout_tree(rev, None)?;
+
+    Ok(())
 }

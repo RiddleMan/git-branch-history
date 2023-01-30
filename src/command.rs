@@ -1,5 +1,5 @@
 use crate::args::{Arguments, GitBranchHistoryCommand};
-use crate::repository::get_list;
+use crate::repository::{checkout_last, get_list};
 use std::error::Error;
 
 pub fn display_list(count: usize) -> Result<(), Box<dyn Error>> {
@@ -23,7 +23,7 @@ impl Command {
             GitBranchHistoryCommand::List { length } => {
                 display_list(length)?;
             }
-            GitBranchHistoryCommand::PopBranch => {}
+            GitBranchHistoryCommand::PopBranch => checkout_last()?,
             GitBranchHistoryCommand::Checkout { .. } => {}
         };
         get_list(10)?;
