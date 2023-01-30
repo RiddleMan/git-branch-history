@@ -76,8 +76,7 @@ impl Repository {
         let revspec = self.inner.revparse_single(branch_name)?;
 
         self.inner.checkout_tree(&revspec, None)?;
-        self.inner
-            .set_head(&format!("refs/heads/{}", branch_name))?;
+        self.inner.set_head(&format!("refs/heads/{branch_name}"))?;
 
         Ok(())
     }
