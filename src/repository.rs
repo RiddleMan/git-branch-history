@@ -65,6 +65,23 @@ impl Repository {
         Ok(checkout_logs)
     }
 
+    pub fn checkout_nth(&self, n: usize) -> Result<(), Box<dyn Error>> {
+        let branch_list = self.get_list(n)?;
+        let branch = branch_list.get(n).expect("Entry doesn't exist.");
+
+        self.checkout_branch(&branch.branch)
+    }
+
+    fn checkout_branch(&self, branch_name: &str) -> Result<(), Box<dyn Error>> {
+        let revspec = self.inner.revparse_single(branch_name)?;
+
+        self.inner.checkout_tree(&revspec, None)?;
+        self.inner
+            .set_head(&format!("refs/heads/{}", branch_name))?;
+
+        Ok(())
+    }
+
     pub fn checkout_last(&self) -> Result<(), Box<dyn Error>> {
         let branch_list = self.get_list(1)?;
         let last_checkout = branch_list
@@ -75,12 +92,6 @@ impl Repository {
             panic!("Branch of name: {} no longer exists. Run: `git branch-history checkout` to select other branch.", last_checkout.branch);
         }
 
-        let revspec = self.inner.revparse_single(&last_checkout.branch)?;
-
-        self.inner.checkout_tree(&revspec, None)?;
-        self.inner
-            .set_head(&format!("refs/heads/{}", &last_checkout.branch))?;
-
-        Ok(())
+        self.checkout_branch(&last_checkout.branch)
     }
 }
