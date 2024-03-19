@@ -22,7 +22,7 @@ keywords = ["git", "version-control"]
 
 [dependencies]
 clap = { version = "4.5.3", features = ["derive"] }
-git2 = "0.18.2"
+git2 = "0.18.3"
 lazy_static = "1.4.0"
 regex = "1.10.3"
 
