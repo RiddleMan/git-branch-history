@@ -2,7 +2,8 @@
 name = "git-branch-history"
 description = "Tool for navigating through a history of branch checkouts."
 repository = "https://github.com/RiddleMan/git-branch-history"
-version = "0.1.0"
+homepage = "https://github.com/RiddleMan/git-branch-history"
+version = "0.2.0"
 edition = "2021"
 default-run = "git-branch-history"
 authors = ["Artur Ptaszek <artur@ptaszek.dev>"]
@@ -18,6 +19,12 @@ include = [
     "/tests/**",
 ]
 keywords = ["git", "version-control"]
+
+[package.metadata.wix]
+upgrade-guid = "D9190A9D-C6A0-4E52-8955-8BBA51BC3E58"
+path-guid = "F49014C5-8829-4E4C-8131-B6BF38063E15"
+license = false
+eula = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -29,3 +36,8 @@ regex = "1.10.4"
 [[bin]]
 name = "git-popb"
 path = "src/pop_branch.rs"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
