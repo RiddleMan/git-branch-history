@@ -36,14 +36,14 @@ impl Repository {
         let checkout_logs: Vec<_> = reflog
             .iter()
             .filter(|log| {
-                if let Some(msg) = log.message() {
+                if let Ok(Some(msg)) = log.message() {
                     msg.starts_with("checkout: ")
                 } else {
                     false
                 }
             })
             .map(|log| {
-                let branch_name = if let Some(msg) = log.message() {
+                let branch_name = if let Ok(Some(msg)) = log.message() {
                     get_from_branch_from_ref_msg(msg)
                 } else {
                     "".to_owned()
